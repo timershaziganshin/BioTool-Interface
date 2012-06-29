@@ -5,10 +5,8 @@ ImageGrid::ImageGrid() : QWidget() {
 	deleteMenu = NULL;
 	filesList = new QStringList();
 	dragStatus = NULL;
-	//count = 0;
-	imgGridLayout = new QHBoxLayout();//ImageGridLayout();
+	imgGridLayout = new QHBoxLayout();
 	imgGridLayout->setAlignment(Qt::AlignLeft);
-	//imgGridLayout->setSizeConstraint(QLayout::SetFixedSize);
 	imgGridLayout->setSpacing(20);
 	setLayout(imgGridLayout);	
 	setAcceptDrops(true);		
@@ -23,7 +21,6 @@ ImageGrid::ImageGrid() : QWidget() {
 	tmpLabel->setVisible(false);
 	tmpLabel->setAlignment(Qt::AlignCenter);
 	
-	//hasPano = false;
 	prevSelectedLabel = NULL;
 
 	
@@ -49,16 +46,9 @@ void ImageGrid::mouseMoveEvent(QMouseEvent *e) {
 			}
 			imgGridLayout->setGeometry(r);					
 		}	
-		dragStatus->move(e->x() - dragWidgetXcorr, dragStatus->y());//me->y() - dragWidgetYcorr);
-		/*if(e->x() > container->width()-3) {
-			QScrollBar* sb = container->horizontalScrollBar();
-			int val = sb->value();
-			if(val != sb->maximum()) {
-				sb->setValue(val+sb->pageStep());
-			}
-		}*/
+		dragStatus->move(e->x() - dragWidgetXcorr, dragStatus->y());
 		QWidget* child;
-		if(((child = childAt(e->x() - dragWidgetXcorr, dragStatus->y())) && (child != tmpLabel))) {// || ((child = childAt(e->x() - dragWidgetXcorr + containerSize + 25, dragStatus->y()))/* && (child != tmpLabel)*/)) {
+		if(((child = childAt(e->x() - dragWidgetXcorr, dragStatus->y())) && (child != tmpLabel))) {
 			if(child != dragStatus) {
 				int ind = imgGridLayout->indexOf(child);
 				if(tmpIndex != ind) {				
@@ -66,7 +56,6 @@ void ImageGrid::mouseMoveEvent(QMouseEvent *e) {
 						imgGridLayout->removeWidget(tmpLabel);
 					}	
 					tmpIndex = ind;					
-					//tmpLabel->setFixedSize(containerSize, (int)(containerSize*19/20.0));
 					imgGridLayout->insertWidget(tmpIndex, tmpLabel);
 					QRect r = geometry();
 					if(r.x() < 0) {
@@ -76,12 +65,7 @@ void ImageGrid::mouseMoveEvent(QMouseEvent *e) {
 					}
 					imgGridLayout->setGeometry(r);					
 				}
-			}/* else {
-				if(!imgGridLayout->count() || (imgGridLayout->itemAt(tmpIndex)->widget() != tmpLabel)) {					
-					imgGridLayout->insertWidget(tmpIndex, tmpLabel);
-					imgGridLayout->setGeometry((QRect)geometry());
-				}
-			}*/
+			}
 		}
 	}
 }
@@ -97,7 +81,6 @@ void ImageGrid::mousePressEvent(QMouseEvent *e) {
 		prevSelectedLabel = (QLabel*)child;
 		QImage* i = imgList->at(imgGridLayout->indexOf(child));
 		emit imgSelected(i);
-		//Interface::instance()->showImg(i);
 	}
 	if(e->button() == Qt::LeftButton) {
 		dragStatus = child;
@@ -106,28 +89,11 @@ void ImageGrid::mousePressEvent(QMouseEvent *e) {
 		dragImg = NULL;
 		tmpIndex = -1;
 		dragWidgetXcorr = e->x() - dragStatus->x();
-		//dragWidgetYcorr = me->y() - dragStatus->y();
 	}
 }
 
-/*void ImageGrid::mouseReleaseEvent(QMouseEvent *me) {
-	dragStatus = NULL;
-}*/
-
-/*ImageGrid::ImageGrid(QStringList *filesList) : QWidget() {
-	deleteMenu = NULL;
-	//dragStatus = NULL;
-	//count = 0;
-	imgGridLayout = new ImageGridLayout();
-	setLayout(imgGridLayout);
-	addFiles(filesList);
-	setAcceptDrops(true);
-}*/
-
 void ImageGrid::addFiles(QStringList& filesList) {
-	//QWidget* df = parentWidget();
 	
-	this->filesList;//->append(filesList);
 	QStringListIterator iterator(filesList);	
 	while(iterator.hasNext()) {
 		QString tmp = iterator.next();
@@ -137,7 +103,6 @@ void ImageGrid::addFiles(QStringList& filesList) {
 			im->load(tmp);
 			imgList->append(im);
 			QImage ti = im->scaled(containerSize, (int)(containerSize*18/20.0), Qt::KeepAspectRatio);
-			//delete im;
 			QPixmap img = QPixmap::fromImage(ti);			
 			QLabel* label = new QLabel();
 			label->setFixedSize(containerSize, (int)(containerSize*18/20.0));
@@ -145,7 +110,6 @@ void ImageGrid::addFiles(QStringList& filesList) {
 			label->setPixmap(img);			
 			imgGridLayout->addWidget(label);
 		}
-		//count++;
 	}	
 	QRect r = geometry();
 	if(r.x() < 0) {
@@ -155,13 +119,11 @@ void ImageGrid::addFiles(QStringList& filesList) {
 	}
 	imgGridLayout->setGeometry(r);		
 	emit fileAdded();
-	//setFixedSize(imgGridLayout->sizeHint());
 }
 
 ImageGrid::~ImageGrid() {
 	delete imgGridLayout;
 	if(deleteMenu) {
-		//delete deleteAction;
 		delete deleteMenu;
 	}
 	delete filesList;
@@ -230,7 +192,6 @@ void ImageGrid::contextMenuEvent(QContextMenuEvent* e) {
 		QAction* res = deleteMenu->exec(e->globalPos());
 		if(res == deleteAction) { 
 			deleteCurrent();			
-			//Interface::instance()->showImg(NULL);
 		}
 		if(res == moveLeftAction) {
 			moveLeftCurrent();
@@ -284,22 +245,8 @@ void ImageGrid::addFile(QString& file) {
 	label->setPixmap(img);
 	imgGridLayout->addWidget(label);
 	emit fileAdded();
-	//Interface::instance()->filesAdded();
-	//imgGridLayout->setGeometry((QRect)geometry());			
-	//setFixedSize(imgGridLayout->sizeHint());
 }
 
-/*void ImageGrid::setPano(QImage* img) {	
-	if(img) {
-		hasPano = true;
-		QImage ti = img->scaled(200, 250, Qt::KeepAspectRatio);
-		QPixmap* img = new QPixmap();
-		img->convertFromImage(ti);
-		QLabel* label = new QLabel();
-		label->setPixmap(*img);
-		imgGridLayout->addWidget(label);	
-	}	
-}*/
 
 void ImageGrid::mouseReleaseEvent(QMouseEvent* e) {	
 	if(dragStatus) {
@@ -318,7 +265,6 @@ void ImageGrid::mouseReleaseEvent(QMouseEvent* e) {
 			imgGridLayout->setGeometry(r);	
 			emit fileAdded();
 		}
-		//dragStatus->move(dragWidgetXcorr, me->y() - dragWidgetYcorr);
 		dragStatus = NULL;
 		dragImg = NULL;
 	}
