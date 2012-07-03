@@ -358,7 +358,7 @@ void Interface::compose() {
 	QStringList sl;
 	QImageWriter* iw = new QImageWriter();
 	QDir d;
-	d.mkdir("C:/Temp/BioToolPanoramaCreatortmpimgs/");
+	d.mkpath("C:/Temp/BioToolPanoramaCreatortmpimgs/");
 	for(int i = 0; i<il->size(); i++) {
 		QString name = "C:/Temp/BioToolPanoramaCreatortmpimgs/"+QString::number(i)+".png";
 		sl.append(name);
