@@ -8,6 +8,7 @@
 
 using namespace cv;
 using namespace std;
+//#include "SyncLineEdit.h"
 
 class Interface : public QMainWindow
 {
@@ -17,6 +18,7 @@ public:
 	Interface(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~Interface();
 
+	//static Interface* instance();
 
 	
 	void mousePressEvent(QMouseEvent* e);
@@ -26,6 +28,8 @@ private slots:
 	void quit();
 	void openFilesDialog();
 	void compose();
+	//void openConfig();
+	//void updateBrightness(int val);
 	void setPanorama();
 	void save();
 	void selectPano();
@@ -69,6 +73,8 @@ public slots:
 
 private:
 	
+	
+	//static Interface* inst;
 
 	void setPano(QImage* img);
 	void applyImgChanges();
@@ -78,6 +84,7 @@ private:
 	ImageGrid* imgGrid;
 	QPushButton* composeButton;
 	QPushButton* saveButton;
+	//QLabel* panorama;	
 	OpenCVThread* th;
 	QLabel* imgLabel;
 	QImage* pano;
@@ -92,6 +99,7 @@ private:
 	QCheckBox* keepAR;
 	QSlider* sizeSlider;
 	int imgGridPanoSize;
+	//QWidget* process;
 	QFrame* imgGridPano;
 	QScrollArea* scrollImgViewArea;
 	QImage* imgLabelImg;

@@ -1,6 +1,7 @@
 #include "interface.h"
 #include "Helper.h"
 
+//Interface* Interface::inst = NULL;
 
 Interface::Interface(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
@@ -11,8 +12,14 @@ Interface::Interface(QWidget *parent, Qt::WFlags flags)
 	if(!settings->contains("Path")) {
 		settings->setValue("Path", "C:/");
 	}
+	//settings->sync();
 	dirpath = settings->value("Path").toString();
 
+	/*if(!settings->contains("Recent")) {
+		settings->beginWriteArray("Recent");
+		settings->endArray();
+		recentFiles = new QStringList();
+	} else {*/
 	recentFiles = new QStringList();
 		int size = settings->beginReadArray("Recent");
 		for(int i = 0; i<size; i++) {
@@ -20,6 +27,7 @@ Interface::Interface(QWidget *parent, Qt::WFlags flags)
 			recentFiles->append(settings->value("filepath").toString());
 		}
 		settings->endArray();
+	//}
 	
 	QWidget* userarea = centralWidget();
 	if(!userarea) {
@@ -136,6 +144,7 @@ Interface::Interface(QWidget *parent, Qt::WFlags flags)
 
 	connect(filesListMenu, SIGNAL(triggered(QAction*)), this, SLOT(fileSelected(QAction*)));	
 
+	//composeButton = NULL;
 	imgGridPanoSize = 250;
 	pano = NULL;
 	
@@ -214,28 +223,42 @@ Interface::Interface(QWidget *parent, Qt::WFlags flags)
 	panoLabel->setVisible(false);
 	panoLabel->setFrameStyle(QFrame::Box);
 	panoLabel->setAlignment(Qt::AlignCenter);
+	//connect(panoLabel, SIGNAL(clicked()), this, SLOT(selectPano()));
+	//panoLabel->setLineWidth(1);
+	//layout->addWidget(scrollImgViewArea);
     loadButton = new QPushButton(QIcon("Add folder.png"), "Load files");
+	//loadButton->setFixedHeight(240);
 	composeButton = new QPushButton(QIcon("kuba_icon_ok.png"), "Stitch");
 	composeButton->setEnabled(false);
 	saveButton = new QPushButton(QIcon("Save.png"), "Save pano");
 	saveButton->setEnabled(false);
 
+	//composeButton->setFixedHeight(240);
 	connect(loadButton, SIGNAL(clicked()), this, SLOT(openFilesDialog()));	
 	connect(composeButton, SIGNAL(clicked()), this, SLOT(compose()));
 	connect(saveButton, SIGNAL(clicked()), this, SLOT(openPanoSaveDialog()));
 
 	imgGrid = new ImageGrid();
+	//QFrame* imgGridFrame = new QFrame();	
+	//imgGridFrame->setFixedHeight(250);
 	imgGridPano = new QFrame();
 	QHBoxLayout* imgGridPanoLayout = new QHBoxLayout();		
 	QScrollArea* scrollImgGrid = new QScrollArea();		
 	scrollImgGrid->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	scrollImgGrid->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);	
+	//scrollImgGrid->setFrameStyle(QFrame::NoFrame);
 	scrollImgGrid->setWidget(imgGrid);
+	//l->addWidget(scroll);
+	//scrollImgGrid->setFixedHeight(250);
 	imgGridPano->setFixedHeight(imgGridPanoSize);
+	//imgGridFrame->setLayout(l);
 	imgGridPanoLayout->addWidget(scrollImgGrid);
 	imgGridPanoLayout->addWidget(panoLabel);	
 	imgGridPano->setLayout(imgGridPanoLayout);
+	//layout->addWidget(scrollImgGrid);
 	layout->addWidget(imgGridPano);
+	//ImgGridLayout* igl = new ImageGridLayout();
+	//imgGrid->setLayout(igl);
 	QFrame* buttonsFrame = new QFrame();	
 	QHBoxLayout* buttonsLayout = new QHBoxLayout();	
 	buttonsLayout->addWidget(loadButton);
@@ -249,6 +272,8 @@ Interface::Interface(QWidget *parent, Qt::WFlags flags)
 	connect(imgGrid, SIGNAL(fileAdded()), this, SLOT(filesAdded()));
 	connect(imgGrid, SIGNAL(imgSelected(QImage*)), this, SLOT(showImg(QImage*)));
 	connect(imgGrid, SIGNAL(fileDeleted()), this, SLOT(fileDeleted()));
+	/*connect(imgGrid, SIGNAL(leftCornerReached()), this, SLOT(leftCorner()));
+	connect(imgGrid, SIGNAL(rightCornerReached()), this, SLOT(rightCorner()));*/
 
 	connect(deleteAction, SIGNAL(triggered(bool)), imgGrid, SLOT(deleteCurrent()));
 	connect(moveLeftAction, SIGNAL(triggered(bool)), this, SLOT(moveLeft()));
@@ -297,16 +322,21 @@ Interface::Interface(QWidget *parent, Qt::WFlags flags)
 	keepAR = new QCheckBox("Keep aspect ratio");
 	keepAR->setChecked(true);
 	keepAR->setEnabled(false);
+	//dialogLayout->addWidget(keepAR);
 	QFrame* widthAndHeight = new QFrame();
 	QHBoxLayout* widthAndHeightLayout = new QHBoxLayout();
 	QLabel* widthLabel = new QLabel("Width:");
 	widthAndHeightLayout->addWidget(widthLabel);
 	widthEdit = new QLineEdit();
+	//widthEdit->setInputMask("000000000009");
+	//connect(widthEdit, SIGNAL(editingFinished()), widthEdit, SIGNAL(textEdited(widthEdit->text())));
 	widthEdit->setEnabled(false);
 	widthAndHeightLayout->addWidget(widthEdit);
 	QLabel* heightLabel = new QLabel("Height:");
 	widthAndHeightLayout->addWidget(heightLabel);
 	heightEdit = new QLineEdit();
+	//connect(heightEdit, SIGNAL(editingFinished()), heightEdit, SIGNAL(textEdited(heightEdit->text())));
+	//heightEdit->setInputMask("000000000009");
 	heightEdit->setEnabled(false);
 	widthAndHeightLayout->addWidget(heightEdit);
 	widthAndHeight->setLayout(widthAndHeightLayout);
@@ -314,12 +344,29 @@ Interface::Interface(QWidget *parent, Qt::WFlags flags)
 	QPushButton* dialogSaveButton = new QPushButton("Save");	
 	dialogLayout->addWidget(dialogSaveButton);
 	saveDialog->setLayout(dialogLayout);
+	//QFileDialog* saveFileDialog = new QFileDialog(saveDialog, "Save panorama...", dirpath, "Images (*.png *.xpm *.jpg *.bmp *.gif)");
+	//saveFileDialog->setOption(QFileDialog::DontUseNativeDialog, false);
+	//saveFileDialog->setAcceptMode(QFileDialog::AcceptSave);	
+	//connect(selectFile, SIGNAL(clicked()), saveFileDialog, SLOT(exec()));
+	//connect(saveDialog, SIGNAL(fileSelected(QString&)), fileNameLabel, SLOT(setText(QString&)));
+	//connect(saveButton, SIGNAL(clicked()), saveDialog, SLOT(exec()));
 	connect(sizeSlider, SIGNAL(valueChanged(int)), this, SLOT(sizeChange(int)));
 	connect(isEditable, SIGNAL(stateChanged(int)), this, SLOT(editableChanged(int)));
 	connect(selectFile, SIGNAL(clicked()), this, SLOT(selectFile()));
 	connect(dialogSaveButton, SIGNAL(clicked()), this, SLOT(save()));
 	connect(fileTypeBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(typeChanged(const QString&)));
 	connect(compressionSlider, SIGNAL(valueChanged(int)), this, SLOT(compressionChanged(int)));
+	//connect(widthEdit, SIGNAL(textEdited(QString&)), this, SLOT(widthChanged(QString&)));
+	//connect(heightEdit, SIGNAL(textEdited(QString&)), this, SLOT(heightChanged(QString&)));
+	//connect(keepAR, SIGNAL(stateChanged(int)), this, SLOT(keepARChanged(int)));
+
+	//process = new QWidget(this, Qt::Window|Qt::CustomizeWindowHint|Qt::WindowTitleHint);
+	//process->setWindowTitle("Stitching...");
+	//QRect geom = geometry();
+	//process->setGeometry(geom.x()+10, geom.y()+10, 0, 0);
+	//process->setWindowModality(Qt::NonModal);
+	
+	//userarea->setLayout(layout);
 
 	isStitching = false;
 }
@@ -341,6 +388,7 @@ void Interface::quit() {
 }
 
 void Interface::openFilesDialog() {	
+	//QFileDialog* dlg = new QFileDialog(this, "Load files...", dirpath, "Images (*.png *.xpm *.jpg *.bmp *.gif)");
 	QStringList strList = QFileDialog::getOpenFileNames(NULL, "Load files...", dirpath, "Images (*.png *.xpm *.jpg *.bmp *.gif)");	
 	if(strList.size()) {
 		if(!panoramaCreatorLaunched) {
@@ -350,17 +398,26 @@ void Interface::openFilesDialog() {
 		dirpath = fi.absolutePath();
 		settings->setValue("Path", dirpath);
 		imgGrid->addFiles(strList);
+		//filesAdded();
 	}
 }
 
 void Interface::compose() {
+	/*if(!panorama) {
+		panorama = new QLabel("Panorama Here");
+		QScrollArea* scroll = new QScrollArea();
+		scroll->setWidget(panorama);
+		//scroll->setWidgetResizable(false);
+		scroll->setFrameStyle(QFrame::NoFrame);
+		layout->insertWidget(1, scroll);
+	}*/		
 	QList<QImage*>* il = imgGrid->getImgList();
 	QStringList sl;
 	QImageWriter* iw = new QImageWriter();
 	QDir d;
-	d.mkdir("C:/Temp/BioToolPanoramaCreatortmpimgs/");
+	d.mkpath("Temp/BioToolPanoramaCreatortmpimgs/");	
 	for(int i = 0; i<il->size(); i++) {
-		QString name = "C:/Temp/BioToolPanoramaCreatortmpimgs/"+QString::number(i)+".png";
+		QString name = "Temp/BioToolPanoramaCreatortmpimgs/"+QString::number(i)+".png";
 		sl.append(name);
 		iw->setFileName(name);
 		iw->write(*il->at(i));
@@ -368,26 +425,78 @@ void Interface::compose() {
 	delete iw;
 	th = new OpenCVThread(sl);
 	connect(th, SIGNAL(finished()), this, SLOT(setPanorama()));
+	//loadButton->setEnabled(false);
 	composeButton->setEnabled(false);
 	stitchAction->setEnabled(false);
+	//imgGrid->setAcceptDrops(false);
 	QRect geom = geometry();
+	//process->setGeometry(geom.x()+geom.width()-process->width()-20, geom.y()+geom.height()-process->height()-20, 100, 30);	
 	panoLabel->setPixmap(NULL);
 	panoLabel->setText("Stitching...");
 	panoLabel->update();
 	panoLabel->setVisible(true);
 	isStitching = true;
 	th->start(QThread::TimeCriticalPriority);
+		//if(true) {//Stitcher::OK == ss) {
+			//res = imread("sdfsfd.jpg");
+	/*		QPixmap* p = new QPixmap();
+	p->convertFromImage(qi);			
+	panorama->setPixmap(*p);
+	panorama->setFixedSize(qi.size());*/
+			/*QPushButton* configButton = new QPushButton("Configure panorama");
+			connect(configButton, SIGNAL(clicked()), this, SLOT(openConfig()));
+			layout->insertWidget(2, configButton);*/
+		//} else {			
+	//		panorama->setText("Not enough images");
+	//	}
+	/*else {
+		panorama->setText("Updated Panorama");
+	}*/
 }
 
 void Interface::setPanorama() {
+	//delete th;
+	//process->setVisible(false);
+	//loadButton->setEnabled(true);
 	isStitching = false;
 	composeButton->setEnabled(true);
 	stitchAction->setEnabled(true);
+	//imgGrid->setAcceptDrops(true);	
 	setPano(new QImage(*th->getResult()));	
 	panoMat = th->getMatResult();
+	//imshow("dasd", Mat(Helper::qImage2IplImage(*th->getResult())));
 	delete th;
 }
 
+/*void Interface::openConfig() {	
+	QFrame* fr = new QFrame();
+	QVBoxLayout* frLayout = new QVBoxLayout();
+	QSlider* brightnessSlider = new QSlider();
+	brightnessSlider->setRange(10, 30);
+	brightnessSlider->setTracking(true);
+	connect(brightnessSlider, SIGNAL(valueChanged(int)), this, SLOT(updateBrightness(int)));
+	frLayout->addWidget(brightnessSlider);
+	fr->setLayout(frLayout);
+	layout->insertWidget(2, fr);
+}
+
+void Interface::updateBrightness(int val) {
+	QImage img = panorama->pixmap()->toImage();
+	IplImage* iimg = Helper::qImage2IplImage(img);
+	Mat res;
+	(*(Mat*)(iimg->imageData)).convertTo(res, -1, val/10.0f);
+	QImage newimg = Helper::IplImage2QImage(&((IplImage)res));
+	QPixmap* p = new QPixmap();
+	p->convertFromImage(newimg);
+	panorama->setPixmap(*p);
+}*/
+
+/*Interface* Interface::instance() {
+	if(!inst) {
+		inst = new Interface();
+	}
+	return inst;
+}*/
 
 void Interface::filesAdded() {
 	QStringListIterator iter2(*imgGrid->getFilesList());
@@ -443,6 +552,10 @@ void Interface::save() {
 		saveDialog->done(0);
 	
 	
+	/*if(pano) {
+		QString fname = QFileDialog::getSaveFileName(NULL, "Save panorama...", dirpath, "Images (*.png *.xpm *.jpg *.bmp *.gif)");	
+		
+	}*/
 }
 
 void Interface::showImg(QImage* img) {	
@@ -453,6 +566,12 @@ void Interface::showImg(QImage* img) {
 		} else {
 			panoAction->setChecked(true);
 		}
+		/*QListIterator<QAction*> iter(filesListMenu->actions());
+		while(iter.hasNext()) {
+			iter.next()->setChecked(false);
+		}*/
+		
+		//act->setChecked(true);
 		imgLabelImg = img;
 		imgLabelShowImg = new QImage(*img);
 		if(img == pano) {
@@ -494,6 +613,7 @@ void Interface::showImg(QImage* img) {
 		resetAction->setEnabled(true);
 		applyAction->setEnabled(true);
 		applyToAllAction->setEnabled(true);
+		//grayButton->setText("Make grayscale");
 		QImage ti = img->scaled(scrollImgViewArea->size(), Qt::KeepAspectRatio);
 		scaleSlider->setValue((int)floor(((double)ti.width()/img->width()*100)));
 		QPixmap p = QPixmap::fromImage(ti);
@@ -524,10 +644,12 @@ void Interface::setPano(QImage *img) {
 	} else {
 		panoLabel->setText("Failed");
 	}
+	//panoLabel->setVisible(true);
 }
 
 void Interface::selectPano() {
 	emit panoSelected();
+	//imgGrid->removeSelection();
 	panoLabel->setLineWidth(3);
 	showImg(pano);
 }
@@ -538,6 +660,7 @@ void Interface::mousePressEvent(QMouseEvent* e) {
 			selectPano();
 		}
 	}
+	//event(e);
 }
 
 void Interface::fileDeleted() {
@@ -696,6 +819,12 @@ bool Interface::event(QEvent* e) {
 				panoLabel->setText("Stitching...");
 			}
 		}
+		/*if(imgLabel->pixmap()) {			
+			QImage ti = imgLabelShowImg->scaled(scrollImgViewArea->size(), Qt::KeepAspectRatio);
+			QPixmap p = QPixmap::fromImage(ti);
+			imgLabel->setPixmap(p);
+			imgLabel->setFixedSize(ti.size());
+		}*/
 		imgGrid->setFixedHeight(imgGridPanoSize-50);
 	}
 	return QWidget::event(e);
@@ -747,7 +876,14 @@ void Interface::grayButtonClicked(int s) {
 }
 
 void Interface::applyImgChanges() {	
-	Mat newm;
+	Mat newm;// = Mat::zeros(imgLabelMatImg->size(), imgLabelMatImg->type());
+	/*for(int c1 = 0; c1<imgLabelMatImg->rows; c1++) {
+		for(int c2 = 0; c2<imgLabelMatImg->cols; c2++) {
+			for(int c3 = 0; c3<3; c3++) {
+				newm.at<Vec3b>(c1, c2)[c3] = saturate_cast<uchar>(contrast*imgLabelMatImg->at<Vec3b>(c1, c2)[c3] + brightness);
+			}
+		}
+	}*/
 
 	
 	imgLabelMatImg->convertTo(newm, -1, contrast, brightness);
@@ -882,6 +1018,7 @@ void Interface::fileSelected(QAction* act) {
 void Interface::moveLeft() {
 	imgGrid->moveLeftCurrent();
 	int ind = imgGrid->getCurrentId();
+	//filesListMenu->actions().at(ind)->setChecked(true);
 	moveLeftAction->setEnabled(true);
 	moveRightAction->setEnabled(true);
 	if(ind == 0) {
@@ -895,6 +1032,7 @@ void Interface::moveLeft() {
 void Interface::moveRight() {
 	imgGrid->moveRightCurrent();
 	int ind = imgGrid->getCurrentId();
+	//filesListMenu->actions().at(ind)->setChecked(true);
 	moveLeftAction->setEnabled(true);
 	moveRightAction->setEnabled(true);
 	if(ind == 0) {
@@ -926,8 +1064,10 @@ void Interface::loadRecent() {
 	launchPanoramaCreator();
 	QModelIndexList l;
 	l << recentView->selectionModel()->selectedIndexes();
+	//QListIterator<QModelIndex> iter(l);
 	QStringList s;
 	for(int i = 0; i<l.size(); i++) {
+		//QModelIndex mi = iter.next();
 		int ind = l[i].row();
 		s.append(recentFiles->at(ind));
 	}

@@ -2,6 +2,7 @@
 #define IMAGEGRID_H
 
 #include <QtGui>
+//#include "ImageGridLayout.h"
 
 class ImageGrid : public QWidget {
 
@@ -9,9 +10,11 @@ class ImageGrid : public QWidget {
 
 public:
 	ImageGrid();
+	//ImageGrid(QStringList* filesList);
 	~ImageGrid();
 
 	void mousePressEvent(QMouseEvent* me);
+	//void mouseReleaseEvent(QMouseEvent* me);
 	void mouseMoveEvent(QMouseEvent* me);
 
 	void mouseReleaseEvent(QMouseEvent* e);
@@ -22,16 +25,20 @@ public:
 	void addFiles(QStringList& filesList);
 	void addFile(QString& file);
 	
+	//QSize sizeHint();	
 	bool event(QEvent* e);
 	QStringList* getFilesList();
 	QList<QImage*>* getImgList();
 	QString getCurrentFileName();
 	int getCurrentId();
+	//void setPano(QImage* i);
 
 signals:
 	void fileDeleted();
 	void imgSelected(QImage* i);
 	void fileAdded();
+	/*void rightCornerReached();
+	void leftCornerReached();*/
 
 public slots:
 
@@ -44,6 +51,7 @@ public slots:
 private:
 	QWidget* dragStatus;
 	QHBoxLayout* imgGridLayout;
+	//int count;
 	int dragWidgetXcorr;
 	int dragWidgetYcorr;	
 	QStringList* filesList;
@@ -51,6 +59,7 @@ private:
 	QAction* deleteAction;
 	QAction* moveLeftAction;
 	QAction* moveRightAction;
+	//bool hasPano;
 	QLabel* prevSelectedLabel;
 	int containerSize;
 	QList<QImage*>* imgList;
